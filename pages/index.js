@@ -1,6 +1,7 @@
 // pages/display.js
 import { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
+import Image from 'next/image';
 
 export default function DisplayTable() {
   const [data, setData] = useState([]);
@@ -53,9 +54,13 @@ export default function DisplayTable() {
                 </td>
                 <td>{item.cookie}</td>
                 <td>
-                  {item.screenshot && (
-                    <img src={item.screenshot} alt="Screenshot" style={{ maxWidth: '200px' }} />
-                  )}
+                <Image
+  src={item.screenshot}
+  alt="Screenshot"
+  width={200}
+  height={200}
+  style={{ objectFit: 'contain' }}
+/>
                 </td>
                 <td>{item.trigger_time}</td>
               </tr>

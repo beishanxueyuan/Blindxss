@@ -1,6 +1,6 @@
 // pages/api/get.js
 import { supabase } from '../../utils/supabaseClient';
-const moment = require('moment-timezone');
+import moment from 'moment-timezone';
 
 export default async function handler(req, res) {
   // 设置 CORS 头部
