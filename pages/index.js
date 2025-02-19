@@ -5,6 +5,8 @@ import Image from 'next/image';
 
 export default function DisplayTable() {
   const [data, setData] = useState([]);
+  const [expandedRows, setExpandedRows] = useState({}); // 用于跟踪哪些行的内容被展开
+  const [selectedImage, setSelectedImage] = useState(null); // 用于存储当前选中的图片
 
   // 在组件加载时从 Supabase 获取数据
   useEffect(() => {
@@ -13,7 +15,6 @@ export default function DisplayTable() {
         const { data: fetchedData, error } = await supabase
           .from('xss')
           .select('id, url, cookie, screenshot, trigger_time');
-
         if (error) {
           console.error('获取数据时出错:', error);
         } else {
@@ -23,14 +24,12 @@ export default function DisplayTable() {
         console.error('处理请求时出错:', error);
       }
     };
-
     fetchData();
   }, []);
 
   // 删除记录的函数
   const handleDelete = async (id) => {
     try {
-      // 调用 Supabase 删除记录
       const { error } = await supabase
         .from('xss')
         .delete()
@@ -40,7 +39,6 @@ export default function DisplayTable() {
         console.error('删除数据时出错:', error);
         alert('删除失败，请重试');
       } else {
-        // 更新本地状态，移除已删除的记录
         setData((prevData) => prevData.filter((item) => item.id !== id));
         alert('删除成功');
       }
@@ -50,12 +48,20 @@ export default function DisplayTable() {
     }
   };
 
+  // 切换展开/收起状态
+  const toggleExpand = (id) => {
+    setExpandedRows((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
   return (
-    <div>
-      <h1>XSS 数据表</h1>
+    <div style={styles.container}>
+      <h1 style={styles.title}>XSS 数据表</h1>
 
       {/* 渲染表格 */}
-      <table border="1" cellPadding="10" cellSpacing="0">
+      <table style={styles.table}>
         <thead>
           <tr>
             <th>ID</th>
@@ -69,39 +75,138 @@ export default function DisplayTable() {
         <tbody>
           {data.length > 0 ? (
             data.map((item) => (
-              <tr key={item.id}>
+              <tr key={item.id} style={styles.row}>
                 <td>{item.id}</td>
                 <td>
                   <a href={item.url} target="_blank" rel="noopener noreferrer">
-                    {item.url}
+                    {expandedRows[item.id] ? item.url : `${item.url.slice(0, 30)}...`}
                   </a>
+                  <button onClick={() => toggleExpand(item.id)} style={styles.expandButton}>
+                    {expandedRows[item.id] ? '收起' : '展开'}
+                  </button>
                 </td>
-                <td>{item.cookie}</td>
+                <td>
+                  {expandedRows[item.id] ? item.cookie : `${item.cookie.slice(0, 30)}...`}
+                  <button onClick={() => toggleExpand(item.id)} style={styles.expandButton}>
+                    {expandedRows[item.id] ? '收起' : '展开'}
+                  </button>
+                </td>
                 <td>
                   {item.screenshot && (
                     <Image
                       src={item.screenshot}
                       alt="Screenshot"
-                      width={200}
-                      height={200}
-                      style={{ objectFit: 'contain' }}
+                      width={50}
+                      height={50}
+                      style={styles.thumbnail}
+                      onClick={() => setSelectedImage(item.screenshot)}
                     />
                   )}
                 </td>
                 <td>{item.trigger_time}</td>
                 <td>
                   {/* 添加删除按钮 */}
-                  <button onClick={() => handleDelete(item.id)}>删除</button>
+                  <button onClick={() => handleDelete(item.id)} style={styles.deleteButton}>
+                    删除
+                  </button>
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="6">没有数据</td>
+              <td colSpan="6" style={styles.noDataCell}>
+                没有数据
+              </td>
             </tr>
           )}
         </tbody>
       </table>
+
+      {/* 图片模态框 */}
+      {selectedImage && (
+        <div style={styles.modalOverlay} onClick={() => setSelectedImage(null)}>
+          <div style={styles.modalContent}>
+            <Image
+              src={selectedImage}
+              alt="Large Screenshot"
+              width={800}
+              height={600}
+              style={styles.largeImage}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+// 样式定义
+const styles = {
+  container: {
+    padding: '20px',
+    fontFamily: 'Arial, sans-serif',
+    maxWidth: '1200px',
+    margin: '0 auto',
+  },
+  title: {
+    textAlign: 'center',
+    marginBottom: '20px',
+    fontSize: '24px',
+    color: '#333',
+  },
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    border: '1px solid #ddd',
+  },
+  row: {
+    borderBottom: '1px solid #ddd',
+  },
+  expandButton: {
+    marginLeft: '10px',
+    padding: '5px 10px',
+    backgroundColor: '#007bff',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+  },
+  thumbnail: {
+    cursor: 'pointer',
+    objectFit: 'contain',
+  },
+  deleteButton: {
+    padding: '5px 10px',
+    backgroundColor: '#dc3545',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+  },
+  noDataCell: {
+    textAlign: 'center',
+    padding: '20px',
+    color: '#666',
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: '20px',
+    borderRadius: '10px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+  },
+  largeImage: {
+    objectFit: 'contain',
+  },
+};
