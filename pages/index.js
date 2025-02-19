@@ -27,6 +27,29 @@ export default function DisplayTable() {
     fetchData();
   }, []);
 
+  // 删除记录的函数
+  const handleDelete = async (id) => {
+    try {
+      // 调用 Supabase 删除记录
+      const { error } = await supabase
+        .from('xss')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('删除数据时出错:', error);
+        alert('删除失败，请重试');
+      } else {
+        // 更新本地状态，移除已删除的记录
+        setData((prevData) => prevData.filter((item) => item.id !== id));
+        alert('删除成功');
+      }
+    } catch (error) {
+      console.error('处理删除请求时出错:', error);
+      alert('删除失败，请重试');
+    }
+  };
+
   return (
     <div>
       <h1>XSS 数据表</h1>
@@ -40,6 +63,7 @@ export default function DisplayTable() {
             <th>Cookie</th>
             <th>Screenshot</th>
             <th>Trigger Time</th>
+            <th>操作</th>
           </tr>
         </thead>
         <tbody>
@@ -54,20 +78,26 @@ export default function DisplayTable() {
                 </td>
                 <td>{item.cookie}</td>
                 <td>
-                <Image
-  src={item.screenshot}
-  alt="Screenshot"
-  width={200}
-  height={200}
-  style={{ objectFit: 'contain' }}
-/>
+                  {item.screenshot && (
+                    <Image
+                      src={item.screenshot}
+                      alt="Screenshot"
+                      width={200}
+                      height={200}
+                      style={{ objectFit: 'contain' }}
+                    />
+                  )}
                 </td>
                 <td>{item.trigger_time}</td>
+                <td>
+                  {/* 添加删除按钮 */}
+                  <button onClick={() => handleDelete(item.id)}>删除</button>
+                </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="5">没有数据</td>
+              <td colSpan="6">没有数据</td>
             </tr>
           )}
         </tbody>
