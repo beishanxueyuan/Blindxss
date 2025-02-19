@@ -27,14 +27,13 @@ export default function DisplayTable() {
     fetchData();
   }, []);
 
-  // 删除记录的函数
+  // 删除单条记录的函数
   const handleDelete = async (id) => {
     try {
       const { error } = await supabase
         .from('xss')
         .delete()
         .eq('id', id);
-
       if (error) {
         console.error('删除数据时出错:', error);
         alert('删除失败，请重试');
@@ -44,6 +43,29 @@ export default function DisplayTable() {
       }
     } catch (error) {
       console.error('处理删除请求时出错:', error);
+      alert('删除失败，请重试');
+    }
+  };
+
+  // 删除所有记录的函数
+  const handleDeleteAll = async () => {
+    try {
+      const confirmDelete = window.confirm('确定要删除所有记录吗？');
+      if (!confirmDelete) return;
+
+      const { error } = await supabase
+        .from('xss')
+        .delete().neq('id', 0);
+
+      if (error) {
+        console.error('删除所有数据时出错:', error);
+        alert('删除失败，请重试');
+      } else {
+        setData([]); // 清空本地数据
+        alert('所有记录已删除');
+      }
+    } catch (error) {
+      console.error('处理删除所有请求时出错:', error);
       alert('删除失败，请重试');
     }
   };
@@ -59,6 +81,11 @@ export default function DisplayTable() {
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>XSS 数据表</h1>
+
+      {/* 添加“全部删除”按钮 */}
+      <button onClick={handleDeleteAll} style={styles.deleteAllButton}>
+        全部删除
+      </button>
 
       {/* 渲染表格 */}
       <table style={styles.table}>
@@ -153,6 +180,17 @@ const styles = {
     marginBottom: '20px',
     fontSize: '24px',
     color: '#333',
+  },
+  deleteAllButton: {
+    display: 'block',
+    margin: '20px auto',
+    padding: '10px 20px',
+    backgroundColor: '#dc3545',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontSize: '16px',
   },
   table: {
     width: '100%',
