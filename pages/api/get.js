@@ -77,7 +77,7 @@ async function sendEmailNotification(url, cookie) {
     `,
   };
 
-  const response = await fetch('https://luckycola.com.cn/tools/customMail', {
+  const response = await fetch('http://luckycola.com.cn/tools/customMail', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
