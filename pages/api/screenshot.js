@@ -1,7 +1,13 @@
 // pages/api/screenshot.js
 import { supabase } from '../../utils/supabaseClient';
 
-// pages/api/screenshot.js
+export const config = {
+  api: {
+      bodyParser: {
+          sizeLimit: '10mb' // Set desired value here
+      }
+  }
+}
 export default async function handler(req, res) {
   // 设置 CORS 头部
   res.setHeader('Access-Control-Allow-Origin', '*');
