@@ -49,6 +49,5 @@ async function insertToSupabaseAsync(url, cookie, screenshot, trigger_time) {
   if (error) {
     throw new Error(`插入数据库失败: ${error.message}`);
   }
-
   console.log('数据已异步插入 Supabase:', data);
 }
